@@ -27,11 +27,13 @@ useful = {}
 for text in tqdm(corpus_texts, desc='Reading Files'):
     with open(documents + text, 'r') as f:
         thisdoc = []
+        t_search = re.compile (r'^[a-zA-Z]+',re.IGNORECASE)
+        d_search = re.compile (r'\.')
         for row in f.readlines():
             row = row.split(',')
             if len(row)==2:  # No rows with more than two items
-                idx = row[0].strip().replace('"', '')  # Strip quotes from term
-                if re.match('\D', idx) and len(idx) > 2:  # No digits
+                idx = row[0].strip().replace('"', '').replace('-','').replace('_','')  # Strip quotes and replace _,- with blanks in term
+                if t_search.match(idx) and not d_search.findall(idx) and len(idx) > 2:  # No digits
                     val = int(row[1].strip())  # Get count within document
                     thisdoc.append((idx, val))
                     if idx in freqs:
