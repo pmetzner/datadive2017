@@ -41,7 +41,7 @@ pickle.dump(model, gzip.open('lda.p.gz', 'wb', compresslevel=9))
 # Get top terms for each topic
 topic_terms = []
 for i in range(n_topics):
-    temp = model.show_topic(i, 10)
+    temp = model.show_topic(i, 5)
     terms = []
     for term in temp:
         terms.append(term)
@@ -55,11 +55,9 @@ def terms_to_wordcounts(terms, multiplier=1000):
     expanded = " ".join(expanded)
     return(expanded)
 
-wordcloud = (WordCloud(background_color="black")
-             .generate(terms_to_wordcounts(topic_terms[0])))
 
-plt.imshow(wordcloud)
-plt.savefig('./figures/wordcloud_01.png')
+
+
 
 
 print('Calculate similarities.')
@@ -79,7 +77,15 @@ thisdoc = random.choice(features.filename.tolist())
 if thisdoc in docs:
     idx = docs.index(thisdoc)
     loadings = model.get_document_topics(corpus_tfidf[idx])
-    model.show_topic(loadings[0][0], 10)
+    loadings = sorted(loadings, key=lambda x: x[1])
+    topics = [model.show_topic(l[0], 10) for l in loadings]
+    for i in range(len(topics)):
+        wordcloud = (WordCloud(background_color="white")
+                     .generate(terms_to_wordcounts(topics[i])))
+        plt.imshow(wordcloud)
+        plt.savefig('./figures/wordcloud_%s.png' % i)
+
+    top_topic = sorted(top_topic, key=lambda x: x[1])
 
 stop = time.time()
 print('Script executed in %s seconds' % str(int(stop-start)))
