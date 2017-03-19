@@ -29,22 +29,23 @@ for text in tqdm(corpus_texts, desc='Reading Files'):
         thisdoc = []
         for row in f.readlines():
             row = row.split(',')
-            if len(row)==2:
-                idx = row[0].strip().replace('"', '')
-                if re.match('\D', idx) and len(idx) > 2:
-                    val = int(row[1].strip())
-                    thisdoc.append(idx, val))
+            if len(row)==2:  # No rows with more than two items
+                idx = row[0].strip().replace('"', '')  # Strip quotes from term
+                if re.match('\D', idx) and len(idx) > 2:  # No digits
+                    val = int(row[1].strip())  # Get count within document
+                    thisdoc.append((idx, val))
                     if idx in freqs:
-                        freqs[idx] += 1
+                        freqs[idx] += 1  # Increase frequency
                         if freqs[idx] == 5:
-                            useful[idx] = None
+                            useful[idx] = None  # Once 
                     else:
-                        freqs[idx] = 1
-        corpus.append(thisdoc)
+                        freqs[idx] = 1  # Start frequency count for new terms
+        corpus.append(thisdoc)  # Add document to corpus
 
-lookup = freqs.copy()
-lookup = {k: list(lookup.keys()).index(k) for k in lookup}
+# Generate lookup table from useful terms
+lookup = dict(zip(useful.keys(), range(1, len(useful)+1)))
 
+# Prune corpus to useful terms (i.e., appears in at least five documents)
 pruned = []
 for doc in tqdm(corpus, desc='Thinning corpus'):
     td = []
@@ -58,7 +59,7 @@ for doc in tqdm(corpus, desc='Thinning corpus'):
     pruned.append(td)
 
 print('Dumping corpus to disk.')
-pickle.dump(pruned, open('corpus.p', 'wb'))
+pickle.dump(pruned, gzip.open('corpus.p.gz', 'wb', compresslevel=9))
 
 print('Saving dictionary.')
 lookup = {v: k for (k,v) in lookup.items()}
@@ -67,3 +68,11 @@ pickle.dump(lookup, open('lookup.p', 'wb'))
 stop = time.time()
 
 print('Documents processed in %s seconds.' % str(int(stop)-int(start)))
+
+counts = {}
+for doc in pruned:
+    for word in doc:
+        if word[0] in counts:
+            counts[word[0]] += word[1]
+        else:
+            counts[word[0]] = word[1]
