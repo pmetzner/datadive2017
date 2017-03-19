@@ -5,15 +5,15 @@ import os
 import re
 import pickle
 import time
-import gzip
+import joblib
 from tqdm import *
 
 start = time.time()
 
 # Set file locations
 home = os.environ['DATADIVE']
-documents = '%s/termcounts-min-2/' % home
-export = '%s/termcounts-min-2_export' % home
+documents = '%s/texts/termcounts-min-2/' % home
+export = '%s/texts/termcounts-min-2_export' % home
 os.system('mkdir -p export')
 
 # Read document word counts
@@ -59,7 +59,7 @@ for doc in tqdm(corpus, desc='Thinning corpus'):
     pruned.append(td)
 
 print('Dumping corpus to disk.')
-pickle.dump(pruned, gzip.open('corpus.p.gz', 'wb', compresslevel=9))
+joblib.dump(pruned, 'corpus.p.gz')
 
 print('Saving dictionary.')
 lookup = {v: k for (k,v) in lookup.items()}
@@ -67,12 +67,5 @@ pickle.dump(lookup, open('lookup.p', 'wb'))
 
 stop = time.time()
 
-print('Documents processed in %s seconds.' % str(int(stop)-int(start)))
+print('Script executed in %s seconds.' % str(int(stop-start)))
 
-counts = {}
-for doc in pruned:
-    for word in doc:
-        if word[0] in counts:
-            counts[word[0]] += word[1]
-        else:
-            counts[word[0]] = word[1]
