@@ -57,9 +57,6 @@ def terms_to_wordcounts(terms, multiplier=1000):
 
 
 
-
-
-
 print('Calculate similarities.')
 index = similarities.MatrixSimilarity(model[corpus_tfidf])
 vec_lda = model[corpus_tfidf]
@@ -70,8 +67,12 @@ docs = os.listdir(documents)
 docs = [i.replace('termCounts-', '') for i in docs]
 docs = [re.sub('txt$', 'pdf', i) for i in docs]
 
+'32084_karapetis2008.pdf'
+'103778_queirolo2014.pdf'
+
 features = pd.read_csv('%s/features/features.csv' % home)
 features = features.dropna()
+features = features.loc[features.label_top_level != '[]']
 
 thisdoc = random.choice(features.filename.tolist())
 if thisdoc in docs:
@@ -83,7 +84,7 @@ if thisdoc in docs:
         wordcloud = (WordCloud(background_color="white")
                      .generate(terms_to_wordcounts(topics[i])))
         plt.imshow(wordcloud)
-        plt.savefig('./figures/wordcloud_%s.png' % i)
+        plt.savefig('./figures/wordcloud_b%s.png' % i)
 
     top_topic = sorted(top_topic, key=lambda x: x[1])
 
